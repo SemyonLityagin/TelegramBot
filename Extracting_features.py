@@ -23,9 +23,11 @@ def get_features(file_name: str, feature_extractor):
     """
     user_id, date, emotions, text_number = file_name.split("/")[2].split("+")
     y = feature_extractor.process_file(file_name)
-    y.insert(0, "user_id", int(user_id))
     y.insert(0, "emotions", emotions)
+
+    y.insert(0, "user_id", int(user_id))
     y.insert(0, "text_number", text_number.split(".")[0])
+
     return y
 
 
@@ -41,16 +43,32 @@ def extract_features_from_all_users_folders(root_dir: str):
     file_list = [f for f in iglob(root_dir, recursive=True) if os.path.isfile(f)]
     frames = []
     fe = get_feature_extractor()
+
     for file in file_list:
         if file.endswith(".mp3"):
+
             print(file)
             y = get_features(str(file), feature_extractor=fe)
             frames.append(y)
-    result = pd.concat(frames)
+            break
 
+    result = pd.concat(frames)
     return result
 
+def get_pretty_dataframe():
+    df = pd.read_csv("./csv_files/{}.csv".format("Emobase_extracted_features"))
+    df = df.iloc[:, 5:] #Убрали первые 5 колонок
+    return df
 
-# Пример получения
-extract_features_from_all_users_folders(".").to_csv(
-    path_or_buf="./csv_files/{}.csv".format("Emobase_extracted_features"), index=True)
+
+if "__main__" == __name__:
+    # Пример получения
+    extract_features_from_all_users_folders(".").to_csv(
+        path_or_buf="./csv_files/{}.csv".format("Emobase_extracted_features"), index=True)
+
+    get_pretty_dataframe()
+
+
+
+
+
