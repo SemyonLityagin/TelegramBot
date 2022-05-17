@@ -23,6 +23,7 @@ def get_features(file_name: str, feature_extractor):
     """
     user_id, date, emotions, text_number = file_name.split("/")[2].split("+")
     y = feature_extractor.process_file(file_name)
+
     y.insert(0, "emotions", emotions)
 
     y.insert(0, "user_id", int(user_id))
@@ -43,32 +44,43 @@ def extract_features_from_all_users_folders(root_dir: str):
     file_list = [f for f in iglob(root_dir, recursive=True) if os.path.isfile(f)]
     frames = []
     fe = get_feature_extractor()
-
+    couner = 0
     for file in file_list:
         if file.endswith(".mp3"):
-
             print(file)
             y = get_features(str(file), feature_extractor=fe)
-            frames.append(y)
-            break
+            for emotion in y["emotions"].array[0].split("_"):
+                row = y.copy()
+                row["emotions"] = emotion
+                frames.append(row)
+
+            couner+=1
+            if couner > 4:
+                break
 
     result = pd.concat(frames)
     return result
 
+
 def get_pretty_dataframe():
     df = pd.read_csv("./csv_files/{}.csv".format("Emobase_extracted_features"))
-    df = df.iloc[:, 5:] #Убрали первые 5 колонок
+    df = df.iloc[:, 5:]  # Убрали первые 5 колонок
     return df
+
+
+def save_to_csv_file(df, file_path="./csv_files/{}.csv", features="Emobase_extracted_features"):
+    df.to_csv(
+        path_or_buf=(file_path).format("%s" % features), index=True)
+
+
+def change_dataframe_one_emotion_per_row(df):
+    df = df.reset_index()  # make sure indexes pair with number of rows
+    for index, row in df.iterrows():
+        print(row['c1'], row['c2'])
+
 
 
 if "__main__" == __name__:
     # Пример получения
-    extract_features_from_all_users_folders(".").to_csv(
-        path_or_buf="./csv_files/{}.csv".format("Emobase_extracted_features"), index=True)
-
+    save_to_csv_file(extract_features_from_all_users_folders("."))
     get_pretty_dataframe()
-
-
-
-
-
