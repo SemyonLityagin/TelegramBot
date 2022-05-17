@@ -54,9 +54,7 @@ def extract_features_from_all_users_folders(root_dir: str):
                 row["emotions"] = emotion
                 frames.append(row)
 
-            couner+=1
-            if couner > 4:
-                break
+
 
     result = pd.concat(frames)
     return result
