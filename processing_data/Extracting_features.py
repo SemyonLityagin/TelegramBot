@@ -44,7 +44,6 @@ def extract_features_from_all_users_folders(root_dir: str):
     file_list = [f for f in iglob(root_dir, recursive=True) if os.path.isfile(f)]
     frames = []
     fe = get_feature_extractor()
-    couner = 0
     for file in file_list:
         if file.endswith(".mp3"):
             print(file)
@@ -59,16 +58,42 @@ def extract_features_from_all_users_folders(root_dir: str):
     result = pd.concat(frames)
     return result
 
+def extract_features_from_all_users_folders_old(root_dir: str):
+    """
+    Функция итерируется по папкам пользователей и запускает извлечение фич для каждой из найденных аудиозаписей.
+    :param root_dir: Путь до папки с базой данных. Пример: /home/tyoma/PycharmProjects/TelegramBot или если код из
+    папки с проектом rootdir = '.'
+    :return: Dataframe, с колонками: file, start, end, text_number, emotions, date,
+    user_id, ...(features).
+    """
+    root_dir += "/**/*"
+    file_list = [f for f in iglob(root_dir, recursive=True) if os.path.isfile(f)]
+    frames = []
+    fe = get_feature_extractor()
+    couner = 0
+    for file in file_list:
+        if file.endswith(".mp3"):
+            print(file)
+            y = get_features(str(file), feature_extractor=fe)
+            frames.append(y)
 
-def get_pretty_dataframe():
-    df = pd.read_csv("./csv_files/{}.csv".format("Emobase_extracted_features"))
+
+
+
+
+    result = pd.concat(frames)
+    return result
+
+
+def get_pretty_dataframe(file_name = "Emobase_extracted_features"):
+    df = pd.read_csv("./csv_files/{}.csv".format(file_name))
     df = df.iloc[:, 5:]  # Убрали первые 5 колонок
     return df
 
 
-def save_to_csv_file(df, file_path="./csv_files/{}.csv", features="Emobase_extracted_features"):
+def save_to_csv_file(df, file_path="./csv_files/{}.csv", file_name="Emobase_extracted_features"):
     df.to_csv(
-        path_or_buf=(file_path).format("%s" % features), index=True)
+        path_or_buf=(file_path).format("%s" % file_name), index=True)
 
 
 def change_dataframe_one_emotion_per_row(df):
@@ -80,5 +105,5 @@ def change_dataframe_one_emotion_per_row(df):
 
 if "__main__" == __name__:
     # Пример получения
-    save_to_csv_file(extract_features_from_all_users_folders("."))
-    get_pretty_dataframe()
+    save_to_csv_file(extract_features_from_all_users_folders_old(".."), file_name="old_table")
+    save_to_csv_file(get_pretty_dataframe(file_name="old_table"), file_name="old_table_pretty")
