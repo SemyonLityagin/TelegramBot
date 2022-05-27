@@ -2,6 +2,7 @@ import os
 from glob import iglob
 
 import opensmile
+import pandas
 import pandas as pd
 
 
@@ -85,7 +86,7 @@ def extract_features_from_all_users_folders_old(root_dir: str):
     return result
 
 
-def get_pretty_dataframe(file_name = "Emobase_extracted_features"):
+def get_pretty_dataframe(file_name = "Emobase_extracted_features") -> pandas.DataFrame:
     df = pd.read_csv("./csv_files/{}.csv".format(file_name))
     df = df.iloc[:, 5:]  # Убрали первые 5 колонок
     return df
