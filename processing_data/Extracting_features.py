@@ -75,8 +75,11 @@ def extract_features_from_all_users_folders_old(root_dir: str):
     for file in file_list:
         if file.endswith(".mp3"):
             print(file)
-            y = get_features(str(file), feature_extractor=fe)
-            frames.append(y)
+            try:
+                y = get_features(str(file), feature_extractor=fe)
+                frames.append(y)
+            except Exception:
+                pass
 
 
 
